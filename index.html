@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="pt">
+<head>
+    <title>Calculadora Lógica</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #ff6600;   /* laranja */
+            --secondary-color: #ff8533; /* laranja mais claro */
+            --bg-dark: #121212;         /* fundo preto */
+            --text-light: #ffffff;      /* texto branco */
+            --calculator-bg: #1e1e1e;   /* fundo cinza escuro */
+            --button-bg: #2a2a2a;       /* botão padrão */
+            --button-hover-bg: #ff6600; /* hover laranja */
+            --button-text: #ffffff;     /* texto botão */
+            --button-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--text-light);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header {
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .calculator {
+            padding: 20px;
+            background-color: var(--calculator-bg);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        #display1 {
+            font-size: 18px;
+            height: 5.5em;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            padding: 12px;
+            background-color: #000;
+            color: var(--primary-color);
+            border: 1px solid #333;
+            resize: none;
+        }
+
+        button {
+            width: 16%;
+            height: 45px;
+            font-family: 'Segoe UI', sans-serif;
+            border: none;
+            border-radius: 8px;
+            outline: none;
+            margin: 5px 0;
+            font-weight: 600;
+            background-color: var(--button-bg);
+            color: var(--text-light);
+            transition: all 0.2s ease-in-out;
+            box-shadow: var(--button-shadow);
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--button-hover-bg);
+            color: #fff;
+        }
+
+        button.operator-group {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: #fff;
+            font-size: 20px;
+        }
+
+        button.operand-group {
+            background-color: #2a2a2a;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        button.function-btn {
+            background-color: #444;
+            color: #eee;
+        }
+
+        button#equal {
+            font-size: 22px;
+            background: linear-gradient(135deg, var(--primary-color), #cc5200);
+            color: white;
+        }
+
+        #result {
+            background-color: var(--calculator-bg);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            max-height: 80vh;
+            overflow-y: auto;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        td, th {
+            text-align: center;
+            padding: 8px;
+            border: 1px solid #333;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        table td {
+            color: #ffffff;
+        }
+
+        /* Botão do modal mais discreto */
+        .info-btn-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .btn-info-small {
+            background-color: var(--primary-color);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 22px;          /* Aumentei o padding para acomodar o texto */
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            transition: all 0.25s ease-in-out;
+            white-space: nowrap;
+            min-width: 120px;           /* Largura mínima para garantir que o texto caiba */
+            text-align: center;
+            display: inline-block;
+        }
+
+        .btn-info-small:hover {
+            background-color: #cc5200;
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+
+        /* Modal com padrão preto/branco/laranja */
+        .custom-modal {
+            background-color: var(--calculator-bg);
+            color: var(--text-light);
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.7);
+        }
+
+        .custom-modal .modal-header {
+            border-bottom: 1px solid #333;
+            background-color: #1a1a1a;
+        }
+
+        .custom-modal .modal-title {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .custom-modal .modal-body {
+            background-color: #1e1e1e;
+            color: #ddd;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* Fechar branco */
+        .btn-close-white {
+            filter: invert(1);
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">Calculadora Proposicional</header>
+        <div class="row">
+
+            <!-- Calculadora -->
+            <div class="col-md-6">
+                <div class="calculator">
+                    <!-- Display -->
+                    <div class="calculator-display mb-3">
+                        <textarea readonly id="display1" class="form-control text-right" placeholder="Digite uma expressão lógica..."></textarea>
+                    </div>
+
+                    <!-- Botões -->
+                    <div class="calculator-buttons">
+                        <div class="d-flex justify-content-between button-row">
+                            <button type="button" class="operand-group" onclick="insert('A')">A</button>
+                            <button type="button" class="operand-group" onclick="insert('B')">B</button>
+                            <button type="button" class="operand-group" onclick="insert('C')">C</button>
+                            <button type="button" class="operand-group" onclick="insert('D')">D</button>
+                            <button id="clear" type="button" class="function-btn" onclick="clear_screen()">C</button>
+                            <button id="backspace" type="button" class="function-btn" onclick="backspace()">
+                                <i class="fas fa-backspace"></i>
+                            </button>
+                        </div>
+                        <div class="d-flex justify-content-between button-row">
+                            <button type="button" class="operand-group" onclick="insert('E')">E</button>
+                            <button type="button" class="operand-group" onclick="insert('F')">F</button>
+                            <button type="button" class="operand-group" onclick="insert('G')">G</button>
+                            <button type="button" class="operand-group" onclick="insert('H')">H</button>
+                            <button type="button" class="operator-group" onclick="insert('(')">(</button>
+                            <button type="button" class="operator-group" onclick="insert(')')">)</button>
+                        </div>
+                        <div class="d-flex justify-content-between button-row">
+                            <button type="button" class="operand-group" onclick="insert('I')">I</button>
+                            <button type="button" class="operand-group" onclick="insert('J')">J</button>
+                            <button type="button" class="operand-group" onclick="insert('K')">K</button>
+                            <button type="button" class="operand-group" onclick="insert('L')">L</button>
+                            <button type="button" class="operator-group" onclick="insert('→')">→</button>
+                            <button type="button" class="operator-group" onclick="insert('∧')">∧</button>
+                        </div>
+                        <div class="d-flex justify-content-between button-row">
+                            <button type="button" class="operand-group" onclick="insert('M')">M</button>
+                            <button type="button" class="operand-group" onclick="insert('N')">N</button>
+                            <button type="button" class="operand-group" onclick="insert('O')">O</button>
+                            <button type="button" class="operand-group" onclick="insert('P')">P</button>
+                            <button type="button" class="operator-group" onclick="insert('↔')">↔</button>
+                            <button type="button" class="operator-group" onclick="insert('∨')">∨</button>
+                        </div>
+                        <div class="d-flex justify-content-between button-row">
+                            <button type="button" class="operand-group" onclick="insert('Q')">Q</button>
+                            <button type="button" class="operand-group" onclick="insert('R')">R</button>
+                            <button type="button" class="operand-group" onclick="insert('S')">S</button>
+                            <button type="button" class="operand-group" onclick="insert('T')">T</button>
+                            <button type="button" class="operator-group" onclick="insert('∼')">∼</button>
+                            <button id="equal" type="button" onclick="calculate()">=</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabela Verdade -->
+            <div class="col-md-6">
+                <div id="result" class="result-content">
+                    <h5 id="table-test" class="text-center mb-3">Tabela Verdade</h5>
+                    <div id="expression-type" class="text-center mt-3"></div>
+                    <div id="truth-table"></div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botão Informações (agora discreto e menor, no canto inferior direito) -->
+    <div class="info-btn-container">
+        <button type="button" class="btn-info-small" data-bs-toggle="modal" data-bs-target="#aboutModal">
+            Informações
+        </button>
+    </div>
+
+    <!-- Modal Informações -->
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content custom-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="aboutModalLabel">Informações</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="container">
+                    <h1>Nossa Equipe</h1>
+
+                    <p class="team-description">
+                        Somos <span class="highlight">estudantes de Ciência da Computação na Universidade de Fortaleza</span> focados em
+                        <span class="highlight">soluções tecnológicas de propósitos acadêmicos</span>.
+                        Combinamos dedicação e técnica com pensamento criativo para
+                        <span class="highlight">resolver problemas complexos</span> e entregar
+                        <span class="highlight">resultados eficientes</span>.
+                    </p>
+
+                    <p class="team-description">
+                        Comprometidos com a <span class="highlight">excelência e evolução contínua</span>,
+                        buscamos constantemente <span class="highlight">aprender novas tecnologias</span> e
+                        <span class="highlight">aperfeiçoar nossas habilidades</span> em desenvolvimento
+                        de software e inovação.
+                    </p>
+
+                    <div class="divider"></div>
+
+                    <p class="team-description">
+                        Acreditamos no poder da <span class="highlight">colaboração</span> para
+                        transformar projetos em realidade e impulsionar o progresso tecnológico e o aprendizado acadêmico.
+                    </p>
+
+                    <p class="course-info">3º semestre de Ciência da Computação</p>
+
+                    <hr>
+
+                    <p><strong>Integrantes da equipe</strong></p>
+                    <hr>
+                    <ul>
+                        <li>Nome: Sérgio Moita Ribeiro</li>
+                        <li>Nome: Pedro Pinheiro Barros Leal</li>
+                        <li>Nome: Marco Antônio de Moura Andrade</li>
+                    </ul>
+
+                    <hr>
+
+                    <p><strong>Professor: José Rubens Rodrigues</strong></p>
+                    <hr>
+                    <li>Professor da área de Matemática, com graduação em Matemática pela Universidade Federal do Ceará em 2006, mestrado e doutorado em Engenharia de Teleinformática pela Universidade Federal do Ceará em 2009 e 2014, respectivamente.</li>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        let lastInput = '';
+        let openParentheses = 0;
+
+        // Funções básicas
+        function insert(value) {
+            const display = document.getElementById('display1').value;
+            const operators = ['→', '∧', '∨', '↔',];
+            const neg = '~';
+            const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+            // Impedir operadores consecutivos
+            if (operators.includes(value) && operators.includes(lastInput)) {
+                return;
+            }
+
+               // Impedir negação consecutiva (∼∼)
+            if (lastInput === neg) {
+                return;
+             }
+            
+            // Não permitir iniciar a expressão com um operador condicional
+            if (display === '' && operators.includes(value)) {
+                return;
+            }
+
+            // Não permitir letras consecutivas
+            if (document.getElementById('display1').value != ""){
+                if (letras.includes(value) && letras.includes(lastInput)) {
+                    return;
+                }
+            }
+
+            // Não permitir fechar parênteses sem abrir antes
+            if (value === ')' && openParentheses === 0) {
+                return;
+            }
+
+            // Atualizar contagem de parênteses abertos
+            if (value === '(') {
+                openParentheses++;
+            } else if (value === ')') {
+                openParentheses--;
+            }
+
+            document.getElementById('display1').value += value;
+            lastInput = value;
+        }
+        
+        function backspace() {
+            var display = document.getElementById('display1').value;
+            var value = display.charAt(display.length - 1);
+
+            // Atualizar contagem de parênteses abertos
+            if (value === '(') {
+                openParentheses--;
+            } else if (value === ')') {
+                openParentheses++;
+            }
+
+            document.getElementById('display1').value = display.substring(0, display.length - 1);
+            lastInput = display.substring(display.length - 2, display.length - 1);
+        }
+        
+        function clear_screen() {
+            document.getElementById('display1').value = '';
+            document.getElementById('truth-table').innerHTML = '';
+            document.getElementById('expression-type').innerHTML = '';
+            lastInput = '';
+            openParentheses = 0;
+        }
+        
+        function calculate() {
+            var expression = document.getElementById('display1').value;
+            if (expression.trim() === '') {
+                alert('Por favor, digite uma expressão lógica!');
+                return;
+            }
+            
+            generateTruthTable(expression);
+        }
+
+        function generateTruthTable(expression) {
+            // Identificar variáveis na expressão
+            const variables = [...new Set(expression.match(/[A-Z]/g) || [])].sort();
+            
+            if (variables.length === 0) {
+                alert('Por favor, insira uma expressão lógica válida.');
+                return;
+            }
+
+            // Corrigir parênteses não fechados
+            expression = corrigirParenteses(expression);
+
+            // Criar tabela HTML
+            let tableHTML = '<table class="table table-bordered">';
+            
+            // Cabeçalho da tabela
+            tableHTML += '<thead><tr>';
+            variables.forEach(variable => {
+                tableHTML += `<th>${variable}</th>`;
+            });
+
+            // Adicionar subexpressões ao cabeçalho
+            const subexpressoes = extrairSubexpressoes(expression);
+            subexpressoes.forEach(subexp => {
+                tableHTML += `<th>${subexp}</th>`;
+            });
+
+            tableHTML += `<th>${expression}</th></tr></thead>`;
+            
+            // Corpo da tabela
+            tableHTML += '<tbody>';
+            
+            // Número de linhas na tabela = 2^número de variáveis
+            const rows = Math.pow(2, variables.length);
+            
+            let resultados = [];
+
+            // Gerar todas as combinações possíveis
+            for (let i = 0; i < rows; i++) {
+                let linha = {};
+                
+                // Gerar valor para cada variável nesta linha
+                for (let j = 0; j < variables.length; j++) {
+                    // Valor lógico (0 ou 1)
+                    const value = (i >> (variables.length - j - 1)) & 1;
+                    linha[variables[j]] = value ? 'F' : 'V';
+                }
+
+                // Calcular subexpressões
+                subexpressoes.forEach(subexp => {
+                    linha[subexp] = avaliarExpressao(linha, subexp);
+                });
+                
+                // Valor da expressão
+                const result = avaliarExpressao(linha, expression);
+                linha[expression] = result;
+                resultados.push(result);
+                
+                // Adicionar linha à tabela HTML
+                tableHTML += '<tr>';
+                variables.forEach(variable => {
+                    tableHTML += `<td>${linha[variable]}</td>`;
+                });
+                subexpressoes.forEach(subexp => {
+                    tableHTML += `<td>${linha[subexp]}</td>`;
+                });
+                tableHTML += `<td>${linha[expression]}</td></tr>`;
+            }
+            
+            tableHTML += '</tbody></table>';
+            
+            // Inserir tabela no HTML
+            document.getElementById('truth-table').innerHTML = tableHTML;
+
+            // Verificações lógicas
+            let expressionType = '';
+            if (isTautology(resultados)) {
+                expressionType = "A expressão é uma <strong>TAUTOLOGIA</strong>.";
+            } else if (isContradiction(resultados)) {
+                expressionType = "A expressão é uma <strong>CONTRADIÇÃO</strong>.";
+            } else {
+                expressionType = "A expressão é uma <strong>CONTINGÊNCIA</strong>.";
+            }
+            document.getElementById('expression-type').innerHTML = expressionType;
+        }
+
+        function corrigirParenteses(expressao) {
+            let abrir = (expressao.match(/\(/g) || []).length;
+            let fechar = (expressao.match(/\)/g) || []).length;
+            while (abrir > fechar) {
+                expressao += ')';
+                fechar++;
+            }
+            return expressao;
+        }
+
+        function extrairSubexpressoes(expressao) {
+            let regex = /\(([^()]+)\)/g;
+            let subexpressoes = [];
+            let match;
+            while ((match = regex.exec(expressao)) !== null) {
+                subexpressoes.push(match[1]);
+            }
+            return subexpressoes;
+        }
+
+        function avaliarExpressao(valores, expressao) {
+            let exp = expressao;
+        
+            // Substituir variáveis pelos seus valores na string da expressão
+            for (let variavel in valores) {
+                exp = exp.replace(new RegExp(`\\b${variavel}\\b`, "g"), valores[variavel] === 'V' ? 'true' : 'false');
+            }
+        
+            // Substituir operadores lógicos corretamente
+            exp = exp
+                .replace(/∼\(([^()]+)\)/g, "!($1)") // Negação para expressões entre parênteses
+                .replace(/∼([A-Za-z]+)/g, "!($1)")  // Negação para variáveis isoladas
+                .replace(/∧/g, "&&")                // Conjunção
+                .replace(/∨/g, "||")                // Disjunção
+                .replace(/→/g, "|| !")              // Condicional: A → B equivale a !A || B
+                .replace(/↔/g, "==")                // Bicondicional: A ↔ B equivale a (A == B)
+                .replace(/⊻/g, "!=");               // XOR: A ⊻ B equivale a (A != B)
+        
+            // Exibir no console a expressão convertida
+            console.log("Expressão transformada:", exp);
+        
+            try {
+                return eval(exp) ? 'V' : 'F';
+            } catch (e) {
+                console.error("Erro na avaliação da expressão:", e);
+                return 'F';
+            }
+        }
+
+        function isTautology(array) {
+            return array.every(element => element === 'V');
+        }
+
+        function isContradiction(array) {
+            return array.every(element => element === 'F');
+        }
+
+        function isContingency(array) {
+            return !isTautology(array) && !isContradiction(array);
+        }
+    </script>
+</body>
+</html>
